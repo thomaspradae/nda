@@ -1,38 +1,735 @@
+body {
+  font-family: Inter, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  height: 100%;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
 .App {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.main-content {
+  display: flex;
+  background-color: white;
+  width: 100%;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+}
+
+.sidebar {
+  flex: 1;
+  background-color: #f9f9f9;
+  padding: 1.25rem;
+  border-left: 1px solid #ddd;
+  height: 100%;
+}
+
+.progress-bar {
+  height: 1.25rem;
+  background-color: green;
+  color: white;
+  line-height: 1.25rem;
   text-align: center;
+  border-radius: 0.3125rem;
+  margin-bottom: 1.25rem;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.sidebar ul {
+  list-style: none;
+  padding: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.sidebar li {
+  padding: 0.625rem;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.sidebar li.active {
+  font-weight: bold;
+  color: rgb(0, 0, 0);
+}
+
+.section-title {
+  cursor: pointer;
+  padding: 0.625rem;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+}
+
+.section-title.active {
+  color: rgb(0, 0, 0);
+}
+
+.subpages-list {
+  list-style: none;
+  padding-left: 1.25rem;
+}
+
+.subpages-list li {
+  cursor: pointer;
+  padding: 0.3125rem 0;
+}
+
+.subpages-list li.active-subpage {
+  color: blue;
+  font-weight: bold;
+}
+
+.ssn-inputs, .dob-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem; /* 5px -> rem */
+}
+
+.ssn-part:nth-child(1) {
+  width: 30%; /* For the first part, XXX */
+}
+
+.ssn-part:nth-child(3) {
+  width: 25%; /* For the second part, XX */
+}
+
+.ssn-part:nth-child(5) {
+  width: 40%; /* For the last part, XXXX */
+}
+
+.dob-month, .dob-day {
+  width: 1.5rem; /* 35px -> rem */
+}
+
+.dob-year {
+  width: 3rem; /* 50px -> rem */
+}
+
+.separator {
+  font-size: 1.2rem;
+}
+
+.styled-select dob-select{
+  width: 0.4rem; /* 80px -> rem */
+}
+
+/* .question-container {
+  margin-bottom: 1rem; 
+  padding: 1.2rem;
+  background-color: #f6f6f6;
+  border-radius: 0.5rem; 
+  box-sizing: border-box;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 0.625rem; 
+  min-height: 150px; 
+} */
+
+
+/* .question-container {
+  margin-bottom: 1rem;
+  padding: 1.2rem;
+  background-color: #f6f6f6;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+  min-height: 150px; 
+} */
+
+.question-container {
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+  background-color: #f6f6f6;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  /* Initial state with no shadow */
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+  /* Add smooth transition for shadow */
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.question-container:hover {
+  /* Add shadow on hover */
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+}
+
+.question-help{
+  /* font-style:  italic; */
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+
+
+
+/* .question-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 2rem; 
+} */
+
+
+.question-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%; /* Make it take full height of the container */
+}
+
+
+.form-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem; /* 10px -> rem */
+  margin-bottom: 1.25rem;
+  justify-content: flex-end;
+}
+
+.layout-25 {
+  flex: 1 1 calc(25% - 0.625rem); /* Updated gap calculation */
+  min-width: 12.5rem; /* 200px -> rem */
+}
+
+.layout-33 {
+  flex: 1 1;
+  min-width: 15.625rem; /* 250px -> rem */
+}
+
+.layout-50 {
+  flex: 1 1 calc(50% - 0.625rem);
+  min-width: 18.75rem; /* 300px -> rem */
+}
+
+.layout-75 {
+  flex: 1 1 calc(75% - 0.625rem);
+  min-width: 25rem; /* 400px -> rem */
+}
+
+.layout-100 {
+  flex: 1 1 100%;
+}
+
+
+.question-title {
+  font-weight: bold;
+  margin-bottom: 0.3125rem;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .layout-25, .layout-33, .layout-50, .layout-75 {
+    flex: 1 1 100%;
+  }
+}
+
+/* input[type="text"], input[type="password"], input[type="email"], input[type="number"] {
+  width: 90%; 
+  padding: 0.625rem 1rem; 
+  margin: 0.5rem 0; 
+  border: 1.5px solid #ddd;
+  border-radius: 1.875rem;
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  color: #333;
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.1); 
+  outline: none;
+  transition: all 0.3s ease;
+} 
+
+*/
+
+/* input[type="text"], select {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  width: 90%; 
+  padding: 0.625rem 1rem;
+  margin: 0; 
+  border: 1.5px solid #ddd;
+  border-radius: 1.875rem;
+  background-color: #f9f9f9;
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+} */
+
+input[type="text"], select {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  width: 100%; /* Full width of the container */
+  padding: 0.625rem 1rem; /* Consistent padding on both sides */
+  margin: 0; /* No extra margin */
+  border: 1.5px solid #ddd;
+  border-radius: 1.875rem;
+  background-color: #f9f9f9;
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-sizing: border-box; /* Include padding and borders in the width calculation */
+}
+
+
+/* Hover effect */
+input[type="text"]:hover, input[type="password"]:hover, input[type="email"]:hover, input[type="number"]:hover {
+  border-color: #bbb;
+  box-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.15);
+}
+
+/* Focus effect */
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="number"]:focus {
+  border-color: #4A90E2;
+  box-shadow: 0 0 0.375rem rgba(74, 144, 226, 0.4);
+}
+
+/* Styling the select dropdown to match the other inputs */
+.styled-select {
+  width: 98%; /* Matches input width */
+  padding: 0.625rem 1rem; /* Consistent padding with text input */
+  border: 1.5px solid #ddd;
+  border-radius: 1.875rem; /* Rounded, pill-like shape */
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  color: #333;
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.1);
+  outline: none;
+  transition: all 0.3s ease;
+  appearance: none; /* Removes the default select styling for a more custom look */
+}
+
+/* Hover effect for select */
+.styled-select:hover {
+  border-color: #bbb;
+  box-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.15);
+}
+
+/* Focus effect for select */
+.styled-select:focus {
+  border-color: #4A90E2;
+  box-shadow: 0 0 0.375rem rgba(74, 144, 226, 0.4);
+}
+
+/* Styling the date picker to match the other inputs */
+.styled-date {
+  width: 95%; /* Matches input width */
+  padding: 0.625rem 1rem; /* Consistent padding with text input */
+  margin: 0.5rem 0;
+  border: 1.5px solid #ddd;
+  border-radius: 1.875rem; /* Rounded, pill-like shape */
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  color: #333;
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.1);
+  outline: none;
+  transition: all 0.3s ease;
+  appearance: none; /* Removes default browser appearance */
+  font-family: 'Times New Roman', Times, serif; /* Setting the font to Times New Roman */
+  align-self: flex-end; /* Align input at the bottom */
+}
+
+/* Hover effect for date picker */
+.styled-date:hover {
+  border-color: #bbb;
+  box-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.15);
+}
+
+/* Focus effect for date picker */
+.styled-date:focus {
+  border-color: #4A90E2;
+  box-shadow: 0 0 0.375rem rgba(74, 144, 226, 0.4);
+}
+
+/* Calendar button styling (works in some browsers) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  color: #333;
+  font-family: 'Times New Roman', Times, serif; /* Attempts to set the font */
+}
+
+body {
+  font-family: Inter, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  height: 100%;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+.App {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.main-content {
+  display: flex;
+  background-color: white;
+  width: 100%;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+}
+
+/* Toggle button for sidebar */
+.toggle-sidebar {
+  background-color: #4A90E2;
   color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  font-size: 1rem;
 }
 
-.App-link {
-  color: #61dafb;
+.toggle-sidebar:hover {
+  background-color: #357ABD;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.form-section {
+  flex: 3;
+  padding: 2.5rem;
+  overflow-y: auto;
+}
+
+.sidebar {
+  flex: 1;
+  background-color: #f9f9f9;
+  padding: 1.25rem;
+  border-left: 1px solid #ddd;
+  height: 100%;
+}
+
+.progress-bar {
+  height: 1.25rem;
+  background-color: green;
+  color: white;
+  line-height: 1.25rem;
+  text-align: center;
+  border-radius: 0.3125rem;
+  margin-bottom: 1.25rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 0.625rem;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.sidebar li.active {
+  font-weight: bold;
+  color: rgb(0, 0, 0);
+}
+
+.section-title {
+  cursor: pointer;
+  padding: 0.625rem;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+}
+
+.section-title.active {
+  color: rgb(0, 0, 0);
+}
+
+.subpages-list {
+  list-style: none;
+  padding-left: 1.25rem;
+}
+
+.subpages-list li {
+  cursor: pointer;
+  padding: 0.3125rem 0;
+}
+
+.subpages-list li.active-subpage {
+  color: blue;
+  font-weight: bold;
+}
+
+/* .title-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px; 
+} */
+
+.title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.title-help-container{
+  display: flex;
+  justify-content: space-between;
+}
+
+.help-text-trigger{
+  cursor: pointer;
+  color: #adadad;
+  font-size: 0.9rem;
+}
+
+.help-text-trigger:hover{
+  color: #4A90E2;
+  text-decoration: underline;
+} 
+
+.question-title {
+  font-weight: bold;
+  margin-bottom: 0.3125rem;
+}
+
+.question-subtitle {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.custom-dropdown {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+.dropdown-label {
+  padding: 0.625rem 1rem;
+  border: 1.5px solid #ddd;
+  border-radius: 1.875rem;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dropdown-selected {
+  font-weight: bold;
+}
+
+.dropdown-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border: 1.5px solid #ddd;
+  border-radius: 0.375rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  display: none; /* Hide by default, show when clicked */
+}
+
+.custom-dropdown:hover .dropdown-options {
+  display: block; /* Show dropdown when hovering */
+}
+
+.dropdown-option {
+  padding: 0.625rem 1rem;
+  cursor: pointer;
+}
+
+.dropdown-option p {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.dropdown-option:hover {
+  background-color: #f0f0f0;
+}
+
+.separator {
+  margin: 20px 0;
+}
+
+.separator h4 {
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.separator hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin-top: 2rem;
+  /* margin: 0 auto; */
+}
+
+.help-icon {
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #4A90E2;
+  transition: color 0.3s ease;
+}
+
+.help-icon:hover {
+  color: #357ABD;
+}
+
+.help-text {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding-left: 1rem;
+  color: #666;
+}
+
+.help-text.visible {
+  max-height: 100px; /* Adjust as needed based on content length */
+  background-color:#ccdbfd;
+  border-radius: 1rem;  
+  padding: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* ... existing styles ... */
+
+/* Style for the "Need help?" trigger text */
+.help-text-trigger {
+  cursor: pointer;
+  color: #adadad;
+  font-size: 0.9rem;
+}
+
+.help-text-trigger:hover {
+  color: #4A90E2;
+  text-decoration: underline;
+}
+
+/* Help text container */
+.help-text {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding-left: 1rem;
+  color: #666;
+}
+
+.help-text.visible {
+  max-height: 500px; /* Adjust as needed */
+  background-color: #ccdbfd;
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Style for the "Close" button inside the help text */
+.close-button {
+  cursor: pointer;
+  color: #4A90E2;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.close-button:hover {
+  color: #357ABD;
+}
+
+/* ... rest of your styles ... */
+
+/* .help-text {
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  background-color: #ccdbfd;
+  border-radius: 1rem;
+  padding: 0 1rem; 
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+} */
+
+.help-text {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.4s ease, margin 0.4s ease;
+  background-color: #ccdbfd;
+  border-radius: 1rem;
+  padding: 0 1rem; /* Left and right padding only */
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* When help-text is visible */
+.help-text.visible {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.help-text.visible {
+  /* max-height: 200px; Adjust to accommodate your content height */
+  opacity: 1;
+  padding: 1rem; /* Adds top and bottom padding */
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Transition styles for groups */
+.group-transition {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease, padding-top 0.4s ease, padding-bottom 0.4s ease, margin-top 0.4s ease, margin-bottom 0.4s ease;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.group-transition.visible {
+  max-height: 1000px; /* Adjust as needed */
+  opacity: 1;
+  margin-top: 1rem; /* Match your existing margin */
+  margin-bottom: 1rem;
+}
+
+/* Sections Navigator Styles */
+.sections-navigator {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin: 20px;
+}
+
+.section-item {
+  margin-bottom: 15px;
+}
+
+.section-title {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.subsections-list {
+  margin-left: 20px;
+}
+
+.subsection-item {
+  cursor: pointer;
+  margin-top: 5px;
 }

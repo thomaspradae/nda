@@ -24,40 +24,6 @@ html, body, #root {
   border-radius: 0;
 }
 
-.sidebar {
-  flex: 1;
-  background-color: #f9f9f9;
-  padding: 1.25rem;
-  border-left: 1px solid #ddd;
-  height: 100%;
-}
-
-.progress-bar {
-  height: 1.25rem;
-  background-color: green;
-  color: white;
-  line-height: 1.25rem;
-  text-align: center;
-  border-radius: 0.3125rem;
-  margin-bottom: 1.25rem;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar li {
-  padding: 0.625rem;
-  border-bottom: 1px solid #ddd;
-  cursor: pointer;
-}
-
-.sidebar li.active {
-  font-weight: bold;
-  color: rgb(0, 0, 0);
-}
-
 .section-title {
   cursor: pointer;
   padding: 0.625rem;
@@ -67,21 +33,6 @@ html, body, #root {
 
 .section-title.active {
   color: rgb(0, 0, 0);
-}
-
-.subpages-list {
-  list-style: none;
-  padding-left: 1.25rem;
-}
-
-.subpages-list li {
-  cursor: pointer;
-  padding: 0.3125rem 0;
-}
-
-.subpages-list li.active-subpage {
-  color: blue;
-  font-weight: bold;
 }
 
 .ssn-inputs, .dob-inputs {
@@ -110,8 +61,12 @@ html, body, #root {
   width: 3rem; /* 50px -> rem */
 }
 
-.separator {
+.startseparator {
   font-size: 1.2rem;
+  border: none;
+  border-top: 1px solid #ccc;
+  margin-top: 3.5rem;
+  margin-bottom: 3.5rem;
 }
 
 .styled-select dob-select{
@@ -159,6 +114,12 @@ html, body, #root {
   min-height: 150px;
   /* Add smooth transition for shadow */
   transition: box-shadow 0.3s ease-in-out;
+}
+
+.progress-title{
+  color: #ccc;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
 }
 
 .question-container:hover {
@@ -383,67 +344,11 @@ html, body, #root {
   border-radius: 0;
 }
 
-/* Toggle button for sidebar */
-.toggle-sidebar {
-  background-color: #4A90E2;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.25rem;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-}
-
-.toggle-sidebar:hover {
-  background-color: #357ABD;
-}
-
 .form-section {
   flex: 3;
-  padding: 2.5rem;
+  padding: 3rem;
+  padding-top: 2.5rem;
   overflow-y: auto;
-}
-
-.sidebar {
-  flex: 1;
-  background-color: #f9f9f9;
-  padding: 1.25rem;
-  border-left: 1px solid #ddd;
-  height: 100%;
-}
-
-.progress-bar {
-  height: 1.25rem;
-  background-color: green;
-  color: white;
-  line-height: 1.25rem;
-  text-align: center;
-  border-radius: 0.3125rem;
-  margin-bottom: 1.25rem;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar li {
-  padding: 0.625rem;
-  border-bottom: 1px solid #ddd;
-  cursor: pointer;
-}
-
-.sidebar li.active {
-  font-weight: bold;
-  color: rgb(0, 0, 0);
-}
-
-.section-title {
-  cursor: pointer;
-  padding: 0.625rem;
-  font-weight: bold;
-  border-bottom: 1px solid #ddd;
 }
 
 .section-title.active {
@@ -709,27 +614,373 @@ html, body, #root {
   margin-bottom: 1rem;
 }
 
-/* Sections Navigator Styles */
+Sections Navigator Styles
 .sections-navigator {
-  border: 1px solid #ccc;
-  padding: 20px;
-  margin: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
+/* .section-item:hover {
+  background-color: #f0f0f0; /* Ligh
+} */
+
+/* .section-item {
+  flex: 1;
+  margin-right: 20px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-sizing: border-box;
+  color: grey; /* N
+} */
+
 .section-item {
-  margin-bottom: 15px;
+  display: block;
+  align-self: center;
+  align-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-radius: 8px;
 }
 
 .section-title {
+  font-size: 0.8rem;
   font-weight: bold;
   cursor: pointer;
+  margin-bottom: 10px;
+  color: inherit; /* Inherit color from .section-item */
 }
 
+.section-number {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 50%;
+  background-color: #ccc; /* Default grey color */
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  align-self: center;
+}
+
+.active-number {
+  background-color: #007bff; /* Active color (e.g., blue) */
+  transform: scale(1.2); /* Larger size */
+  animation: colorChange 2s infinite alternate; /* Animated color change */
+}
+
+/* @keyframes colorChange {
+  0% {
+    background-color: #007bff;
+  }
+  100% {
+    background-color: #b30000;
+  }
+} */
+
 .subsections-list {
-  margin-left: 20px;
+  display: flex;
+  margin-left: 10px;
 }
 
 .subsection-item {
   cursor: pointer;
   margin-top: 5px;
+  color: grey; /* Non-active subsections are grey */
+  font-size: 0.6rem;
+  text-transform: uppercase;
 }
+
+/* Highlight active section and subsection */
+.active-section {
+  border-radius: 0.5rem;
+  flex: 5; /* Active section takes up more space */
+  color: black; /* Active section text is black */
+  background-color: #ccdbfd;
+  border: none;
+  padding: 1.5rem;
+}
+
+.active-subsection {
+  color: #007bff; /* Blue text for active section title and subsection */
+  font-weight: bold;
+}
+
+/* Optional: Add hover effects */
+.section-title:hover,
+.subsection-item:hover {
+  text-decoration: underline;
+}
+
+.section-base-text{
+  margin-bottom: 0;
+  font-size: 1.5rem;
+  margin-top: 0;
+}
+
+.section-bold-text{
+  margin: 0;
+  font-size: 2rem;
+}
+
+.active-pill {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: #007bff;
+  border-radius: 50%;
+  margin-left: 10px;
+  animation: pillPulse 2s infinite alternate;
+}
+
+.inactive-pill {
+  display: inline-block;
+  width: 100%;
+  height: 20px;
+  background-color: #ddd;
+  border-radius: 10px;
+  margin-top: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.upper-half {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+.section-number.active-number{
+  align-self: flex-start;
+}
+
+.inactive-title {
+  color: #ccc;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+
+}
+
+
+/* Sections Navigator Styles */
+.sections-navigator {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+/* .section-item {
+  display: block;
+  align-self: center;
+  align-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 10px;
+  border-radius: 8px;
+} */
+
+.section-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 10px;
+  color: inherit;
+}
+
+.section-number {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 50%;
+  background-color: #ccc;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  align-self: center;
+}
+
+.active-number {
+  background-color: #007bff;
+  transform: scale(1.8);
+  animation: colorChange 2s infinite alternate;
+}
+
+.subsections-list {
+  display: flex;
+  margin-left: 10px;
+}
+
+.subsection-item {
+  cursor: pointer;
+  margin-top: 5px;
+  color: grey;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.active-subsection {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.section-base-text {
+  margin-bottom: 0;
+  font-size: 1.5rem;
+  margin-top: 0;
+}
+
+.section-bold-text {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.upper-half {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.section-number.active-number {
+  align-self: flex-start;
+}
+
+.inactive-title {
+  color: #ccc;
+  text-transform: uppercase;
+  font-size: 0.6rem;
+  align-self: center;
+  margin-top: 0.3rem;
+}
+
+/* New styles for pills */
+.active-pills {
+  display: flex;
+  justify-content: space-between;
+  width: 50%;
+  margin-top: 10px;
+}
+
+.pill-container { 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.active-pill {
+  display: block;
+  width: 100%;
+  height: 4px;
+  background-color: #007bff;
+  border-radius: 2px;
+  margin-bottom: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.inactive-pill {
+  display: block;
+  width: 4rem;
+  height: 4px;
+  background-color: #6d6d6d;
+  border-radius: 2px;
+  margin-top: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.subsection-title {
+  font-size: 0.7rem;
+  text-align: center;
+  color: #666;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inactive-title-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  align-self: center;
+}
+
+.inactive-pills {
+  margin-top: 5px;
+  align-self: center;
+}
+
+/* Optional: Add hover effects */
+.section-title:hover,
+.subsection-item:hover {
+  text-decoration: underline;
+}
+
+.section-item.inactive-section{
+  align-items: center;
+  align-self: center;
+}
+
+.section-number.inactive-number{
+  align-self: center;
+}
+
+.section-item.inactive-section {
+  display: flex; /* Use flexbox */
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center items horizontally */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-radius: 8px;
+}
+
+.subsection-pill.inactive-pill{  
+  width: 95%;
+  margin: 0.2rem;
+  color: #ccc;
+}
+
+.subsection-pill.active-pill{
+  width: 95%;
+  margin: 0.2rem;
+}
+
+.section-item.active-section {
+  display: block; /* Ensures the active section isn't affected by flexbox centering */
+  flex: 5; /* Control how much space the active section takes compared to others */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 1.5rem; /* Control the internal padding */
+  border-radius: 8px;
+  background-color: #ccdbfd; /* Active section background */
+  transition: box-shadow 0.3s ease-in-out;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.section-item.active-section {
+  width: 80%; /* Set the width of the active section to 80% of the parent container */
+  max-width: 600px; /* Optionally, set a maximum width to ensure it doesn’t get too large */
+  padding: 2rem;
+}
+
+.section-item.active-section:hover{
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+}
+
+.progress-subtitle{
+  margin-bottom: 2rem;
+  margin-top: 0;
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 300;
+  margin-left: 0.1rem;
+}
+

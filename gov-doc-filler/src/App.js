@@ -6,6 +6,9 @@ import SectionsNavigator from './components/SectionsNavigator';
 const sections = {
   personalInfo: [
     {
+      title: 'Personal Information',
+      baseText: "Let's start by filling out some",
+      boldText: 'Personal Information',
       groups: [
         {
           questions: [
@@ -13,119 +16,22 @@ const sections = {
               title: 'Name',
               subtitle: '(First, Middle, Last, Suffix)',
               layout: '50%',
-              help: 'Please provide your full legal name as it appears on your government ID.'
+              help: 'Please provide your full legal name as it appears on your government ID.',
             },
             {
               title: 'Alternate Names',
               subtitle: '(First, Middle, Last, Suffix) - List any names by which you are known or any names under which credit was previously received',
               layout: '50%',
-              help: 'Please provide any other names you have used or are known by.'
+              help: 'Please provide any other names you have used or are known by.',
             },
-          ],
-        },
-        {
-          questions: [
-            {
-              title: 'Date of Birth',
-              subtitle: '(mm-dd-yyyy)',
-              layout: '50%',
-            },
-            {
-              title: 'Social Security Number',
-              subtitle: '(or Individual Taxpayer Identification Number)',
-              layout: '50%',
-            },
-          ],
-        },
-        {
-          questions: [
-            {
-              title: 'Marital Status',
-              layout: '25%',
-            },
-            {
-              title: 'Dependents',
-              layout: '25%',
-            },
-          ],
-        },
-        {
-          questions: [
-            {
-              title: 'Street',
-              layout: '75%',
-            },
-            {
-              title: '# Unit',
-              layout: '25%',
-            },
-          ],
-        },
-        {
-          questions: [
-            {
-              title: 'City',
-              layout: '33%',
-            },
-            {
-              title: 'State',
-              layout: '33%',
-            },
-            {
-              title: 'ZIP Code',
-              layout: '33%',
-            },
-          ],
-        },
-        {
-          questions: [
-            {
-              title: 'Have you served in the military?',
-              layout: '100%',
-              fieldType: 'radio',
-              options: ['Yes', 'No'],
-              name: 'militaryService',
-            },
-          ],
-        },
-        {
-          condition: {
-            field: 'militaryService',
-            value: 'Yes',
-          },
-
-          questions: [
-            {
-              title: 'Branch of Service',
-              layout: '50%',
-              fieldType: 'text',
-              name: 'branchOfService',
-            },
-            {
-              title: 'Rank at Discharge',
-              layout: '50%',
-              fieldType: 'text',
-              name: 'rankAtDischarge',
-            },
-            {
-              title: 'Service Start Date',
-              layout: '50%',
-              fieldType: 'date',
-              name: 'serviceStartDate',
-            },
-            {
-              title: 'Service End Date',
-              layout: '50%',
-              fieldType: 'date',
-              name: 'serviceEndDate',
-            },
-            // Add more military service-related questions as needed
           ],
         },
       ],
     },
     {
       title: 'Contact Information',
+      baseText: 'Provide your contact details below.',
+      boldText: 'Ensure your email address is correct for future correspondence.',
       groups: [
         {
           questions: [
@@ -141,6 +47,8 @@ const sections = {
   incomeSection: [
     {
       title: 'Income Information',
+      baseText: 'Enter your employment and income details.',
+      boldText: 'Accurate information ensures better processing.',
       groups: [
         {
           questions: [
@@ -161,6 +69,8 @@ const sections = {
     },
     {
       title: 'Income Details',
+      baseText: 'Provide detailed income sources.',
+      boldText: 'Ensure all income sources are accurately reported.',
       groups: [
         {
           questions: [
@@ -175,11 +85,13 @@ const sections = {
           ],
         },
       ],
-    }
+    },
   ],
-  carlosSection: [
+  assetsSection: [
     {
-      title: 'Carlos Information',
+      title: 'Assets Information',
+      baseText: 'List all your assets below.',
+      boldText: 'Include all valuable possessions and investments.',
       groups: [
         {
           questions: [
@@ -197,15 +109,116 @@ const sections = {
           ],
         },
       ],
-    }
-
+    },
+  ],
+  liabilitiesSection: [
+    {
+      title: 'Liabilities Information',
+      baseText: 'Provide details about your liabilities.',
+      boldText: 'Accurate information is crucial for assessment.',
+      groups: [
+        {
+          questions: [
+            {
+              title: 'Liabilities Status',
+              layout: '50%',
+              fieldType: 'radio',
+              options: ['Liabilities', 'Not Liabilities'],
+              name: 'liabilitiesStatus',
+            },
+            {
+              title: 'Liabilities Occupation',
+              layout: '50%',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  realEstateSection: [
+    {
+      title: 'Real Estate Information',
+      baseText: 'Enter information about your real estate properties.',
+      boldText: 'Include all owned properties.',
+      groups: [
+        {
+          questions: [
+            {
+              title: 'Real Estate Status',
+              layout: '50%',
+              fieldType: 'radio',
+              options: ['Real Estate', 'Not Real Estate'],
+              name: 'realEstateStatus',
+            },
+            {
+              title: 'Real Estate Occupation',
+              layout: '50%',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  loanInfoSection: [
+    {
+      title: 'Loan Information',
+      baseText: 'Provide details about your loans.',
+      boldText: 'Accurate loan information is required.',
+      groups: [
+        {
+          questions: [
+            {
+              title: 'Loan Status',
+              layout: '50%',
+              fieldType: 'radio',
+              options: ['Loan', 'Not Loan'],
+              name: 'loanStatus',
+            },
+            {
+              title: 'Loan Occupation',
+              layout: '50%',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  agreementSection: [
+    {
+      title: 'Agreement Information',
+      baseText: 'Enter details about your agreements.',
+      boldText: 'Ensure all agreements are accurately represented.',
+      groups: [
+        {
+          questions: [
+            {
+              title: 'Agreement Status',
+              layout: '50%',
+              fieldType: 'radio',
+              options: ['Agreement', 'Not Agreement'],
+              name: 'agreementStatus',
+            },
+            {
+              title: 'Agreement Occupation',
+              layout: '50%',
+            },
+          ],
+        },
+      ],
+    },
   ],
 };
 
+
 const sectionTitles = {
-  personalInfo: 'Personal Information',
-  incomeSection: 'Income Information',
-  carlosSection: 'Carlos Information',
+  personalInfo: 'Personal',
+  incomeSection: 'Income',
+  carlosSection: 'Carlos',
+  liabilitiesSection: 'Liabilities',
+  realEstateSection: 'Real Estate',
+  loanInfoSection: 'Loan',
+  agreementSection: 'Agreement',
+  assetsSection: 'Assets',
   // ... other section titles
 };
 
@@ -376,8 +389,6 @@ function App() {
       </div>
     );
   };
-  
-  
 
   const renderInput = (question, questionIndex) => {
     if (!question) return null;
@@ -565,30 +576,37 @@ function App() {
       </React.Fragment>
     );
   };
-  
-  
 
   const currentSubPageContent = sections[sectionNames[currentSection]][currentSubPage];
+  const { baseText, boldText } = currentSubPageContent;
 
   return (
     <div className="App">
       <div className="main-content">
         <div className="form-section">
-          <h1>Document Filler</h1>
-
+          <div className="progress-val">
+          <h2 className="progress-title">Your progress</h2>
+          <div className="progress-bar" style={{ width: `${progress}%` }}>
+            {Math.round(progress)}%
+          </div>
+          </div>
+          <p className="progress-subtitle">
+          In case you need to review or change any of your answers, 
+          below is the form's navigation. Simply click on a section to navigate to it and view its subsections. 
+          You'll also have the option to review all your answers in a final section before submitting.
+          </p>
             <SectionsNavigator
               sectionNames={sectionNames}
               sections={sections}
               sectionTitles={sectionTitles}
               handleNavigation={handleNavigation}
+              currentSection={currentSection}       // Pass currentSection
+              currentSubPage={currentSubPage}       // Pass currentSubPage
             />
-
-          <div className="progress-bar" style={{ width: `${progress}%` }}>
-            {Math.round(progress)}%
-          </div>
           <form onSubmit={handleSubmit}>
-            <h2>{sectionTitles[sectionNames[currentSection]]}</h2>
-            <h3>{currentSubPageContent.title}</h3>
+            <hr className="startseparator"></hr>
+            {/* <h2>{sectionTitles[sectionNames[currentSection]]}</h2> */}
+            {/* <h3>{currentSubPageContent.title}</h3> */}
 
             {currentSubPageContent.groups.map((group, groupIndex) => (
               renderGroup(group, groupIndex)

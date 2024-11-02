@@ -7,6 +7,8 @@ const SectionsNavigator = ({
   handleNavigation,
   currentSection,
   currentSubPage,
+  completedSubsections,
+  completedSections,
 }) => {
   return (
     <div className="sections-navigator">
@@ -16,12 +18,19 @@ const SectionsNavigator = ({
         return (
           <div
             key={sectionIndex}
-            className={`section-item ${isActiveSection ? 'active-section' : 'inactive-section'}`}
+            className={`section-item ${
+              isActiveSection ? 'active-section' : 'inactive-section'
+            } ${completedSections[sectionIndex] ? 'completed-section' : ''}`}
             onClick={() => handleNavigation(sectionIndex, 0)}
           >
             {/* Inactive Circle */}
+            {/* Inactive Circle */}
             {!isActiveSection && (
-              <div className={`section-number inactive-number`}>
+              <div
+                className={`section-number inactive-number ${
+                  completedSections[sectionIndex] ? 'completed-number' : ''
+                }`}
+              >
                 {sectionIndex + 1}
               </div>
             )}
@@ -59,7 +68,11 @@ const SectionsNavigator = ({
                     >
                       <span
                         className={`subsection-pill ${
-                          currentSubPage === subIndex ? 'active-pill' : 'inactive-pill'
+                          currentSubPage === subIndex
+                            ? 'active-pill'
+                            : completedSubsections[`${sectionIndex}-${subIndex}`]
+                            ? 'completed-pill'
+                            : 'inactive-pill'
                         }`}
                         title={subpage.title}
                       ></span>

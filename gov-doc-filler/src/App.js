@@ -14,12 +14,14 @@ const sections = {
           questions: [
             {
               title: 'Name',
+              name: 'fullName',
               subtitle: '(First, Middle, Last, Suffix)',
               layout: '50%',
               help: 'Please provide your full legal name as it appears on your government ID.',
             },
             {
               title: 'Alternate Names',
+              name: 'alternateNames',
               subtitle: '(First, Middle, Last, Suffix) - List any names by which you are known or any names under which credit was previously received',
               layout: '50%',
               help: 'Please provide any other names you have used or are known by.',
@@ -37,6 +39,7 @@ const sections = {
           questions: [
             {
               title: 'Email',
+              name: 'email',
               layout: '100%',
             },
           ],
@@ -54,13 +57,14 @@ const sections = {
           questions: [
             {
               title: 'Employment Status',
+              name: 'employmentStatus',
               layout: '50%',
               fieldType: 'radio',
               options: ['Employed', 'Unemployed', 'Self-Employed', 'Retired'],
-              name: 'employmentStatus',
             },
             {
               title: 'Occupation',
+              name: 'occupation',
               layout: '50%',
             },
           ],
@@ -76,10 +80,12 @@ const sections = {
           questions: [
             {
               title: 'Annual Income',
+              name: 'annualIncome',
               layout: '50%',
             },
             {
               title: 'Income Source',
+              name: 'incomeSource',
               layout: '50%',
             },
           ],
@@ -97,13 +103,14 @@ const sections = {
           questions: [
             {
               title: 'Carlos Status',
+              name: 'carlosStatus',
               layout: '50%',
               fieldType: 'radio',
               options: ['Carlos', 'Not Carlos'],
-              name: 'carlosStatus',
             },
             {
               title: 'Carlos Occupation',
+              name: 'carlosOccupation',
               layout: '50%',
             },
           ],
@@ -121,13 +128,14 @@ const sections = {
           questions: [
             {
               title: 'Liabilities Status',
+              name: 'liabilitiesStatus',
               layout: '50%',
               fieldType: 'radio',
               options: ['Liabilities', 'Not Liabilities'],
-              name: 'liabilitiesStatus',
             },
             {
               title: 'Liabilities Occupation',
+              name: 'liabilitiesOccupation',
               layout: '50%',
             },
           ],
@@ -145,13 +153,14 @@ const sections = {
           questions: [
             {
               title: 'Real Estate Status',
+              name: 'realEstateStatus',
               layout: '50%',
               fieldType: 'radio',
               options: ['Real Estate', 'Not Real Estate'],
-              name: 'realEstateStatus',
             },
             {
               title: 'Real Estate Occupation',
+              name: 'realEstateOccupation',
               layout: '50%',
             },
           ],
@@ -169,13 +178,14 @@ const sections = {
           questions: [
             {
               title: 'Loan Status',
+              name: 'loanStatus',
               layout: '50%',
               fieldType: 'radio',
               options: ['Loan', 'Not Loan'],
-              name: 'loanStatus',
             },
             {
               title: 'Loan Occupation',
+              name: 'loanOccupation',
               layout: '50%',
             },
           ],
@@ -193,13 +203,14 @@ const sections = {
           questions: [
             {
               title: 'Agreement Status',
+              name: 'agreementStatus',
               layout: '50%',
               fieldType: 'radio',
               options: ['Agreement', 'Not Agreement'],
-              name: 'agreementStatus',
             },
             {
               title: 'Agreement Occupation',
+              name: 'agreementOccupation',
               layout: '50%',
             },
           ],
@@ -208,6 +219,7 @@ const sections = {
     },
   ],
 };
+
 
 
 const sectionTitles = {
@@ -231,6 +243,9 @@ function App() {
   const [formData, setFormData] = useState({});
   const [answeredQuestions, setAnsweredQuestions] = useState(new Set());
   const [clickedHelp, setClickedHelp] = useState({});
+  const [completedSubsections, setCompletedSubsections] = useState({});
+  const [completedSections, setCompletedSections] = useState({});
+
 
   const toggleHelp = (index) => {
     setClickedHelp((prev) => ({
@@ -239,27 +254,74 @@ function App() {
     }));
   };
 
+  const isSubsectionCompleted = (sectionIndex, subPageIndex) => {
+    const subsection = sections[sectionNames[sectionIndex]][subPageIndex];
+    const groups = subsection.groups;
+  
+    for (let group of groups) {
+      if (!isConditionMet(group.condition)) continue;
+      const questions = group.questions;
+      for (let question of questions) {
+        if (!isConditionMet(question.condition)) continue;
+        const name = question.name || question.title;
+        if (!(name in formData) || formData[name] === '') {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  
+  const isSectionCompleted = (sectionIndex) => {
+    const totalSubPages = sections[sectionNames[sectionIndex]].length;
+    for (let subPageIndex = 0; subPageIndex < totalSubPages; subPageIndex++) {
+      const key = `${sectionIndex}-${subPageIndex}`;
+      if (!completedSubsections[key]) {
+        return false;
+      }
+    }
+    return true;
+  };
+  
+
   const handleNavigation = (sectionIndex, subPageIndex) => {
     setCurrentSection(sectionIndex);
     setCurrentSubPage(subPageIndex);
   };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        !event.target.closest('.help-text') &&
-        !event.target.closest('.help-text-trigger')
-      ) {
-        setClickedHelp({});
+    const newCompletedSubsections = {};
+    const newCompletedSections = {};
+  
+    for (let sectionIndex = 0; sectionIndex < sectionNames.length; sectionIndex++) {
+      const totalSubPages = sections[sectionNames[sectionIndex]].length;
+      let sectionCompleted = true;
+  
+      for (let subPageIndex = 0; subPageIndex < totalSubPages; subPageIndex++) {
+        const key = `${sectionIndex}-${subPageIndex}`;
+        if (isSubsectionCompleted(sectionIndex, subPageIndex)) {
+          newCompletedSubsections[key] = true;
+          console.log(`Subsection completed: ${key}`);
+        } else {
+          sectionCompleted = false;
+          console.log(`Subsection not completed: ${key}`);
+        }
       }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  
+      if (sectionCompleted) {
+        newCompletedSections[sectionIndex] = true;
+        console.log(`Section completed: ${sectionIndex}`);
+      }
+    }
+  
+    console.log('Completed Subsections:', newCompletedSubsections);
+    console.log('Completed Sections:', newCompletedSections);
+  
+    setCompletedSubsections(newCompletedSubsections);
+    setCompletedSections(newCompletedSections);
+  }, [formData]);
+  
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -394,8 +456,14 @@ function App() {
     if (!question) return null;
     if (!isConditionMet(question.condition)) return null;
   
-    const { fieldType = 'text', name, options } = question;
-  
+    const { fieldType = 'text', options } = question;
+    const name = question.name;
+    
+    if (!name) {
+      console.error('Question is missing a name:', question);
+      return null; // Skip rendering if name is missing
+    }
+      
     // Check for specific cases like Date of Birth, SSN, and other custom fields
     switch (question.title) {
       case 'Date of Birth':
@@ -452,7 +520,7 @@ function App() {
               name="ssn-part1"
               placeholder="XXX"
               value={formData['ssn-part1'] || ''}
-              onChange={handleChange}
+              onChange={handleChange} 
               className="ssn-part"
               maxLength={3}
               pattern="\d{3}" // Ensures the value is numeric
@@ -602,6 +670,8 @@ function App() {
               handleNavigation={handleNavigation}
               currentSection={currentSection}       // Pass currentSection
               currentSubPage={currentSubPage}       // Pass currentSubPage
+              completedSubsections={completedSubsections} // Pass completedSubsections
+              completedSections={completedSections}       // Pass completedSections
             />
           <form onSubmit={handleSubmit}>
             <hr className="startseparator"></hr>
@@ -612,16 +682,24 @@ function App() {
               renderGroup(group, groupIndex)
             ))}
 
-            <div className="buttons">
-              {(currentSection > 0 || currentSubPage > 0) && (
-                <button type="button" onClick={handlePreviousSubPage}>
-                  Back
-                </button>
-              )}
-              <button type="button" onClick={handleNextSubPage}>
-                Next
+          <div className="buttons">
+            {(currentSection > 0 || currentSubPage > 0) && (
+              <button
+                type="button"
+                onClick={handlePreviousSubPage}
+                className="navigation-button back-button"
+              >
+                Back
               </button>
-            </div>
+            )}
+            <button
+              type="button"
+              onClick={handleNextSubPage}
+              className="navigation-button next-button"
+            >
+              Next
+            </button>
+          </div>
           </form>
         </div>
       </div>

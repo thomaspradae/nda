@@ -718,7 +718,7 @@ Sections Navigator Styles
 
 .section-base-text{
   margin-bottom: 0;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   margin-top: 0;
 }
 
@@ -831,12 +831,6 @@ Sections Navigator Styles
   font-weight: bold;
 }
 
-.section-base-text {
-  margin-bottom: 0;
-  font-size: 1.5rem;
-  margin-top: 0;
-}
-
 .section-bold-text {
   margin: 0;
   font-size: 2rem;
@@ -866,6 +860,16 @@ Sections Navigator Styles
   justify-content: space-between;
   width: 50%;
   margin-top: 10px;
+}
+
+.subsection-pill {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: #007bff;
+  border-radius: 50%;
+  margin-left: 10px;
+  animation: pillPulse 2s infinite alternate;
 }
 
 .pill-container { 
@@ -983,4 +987,62 @@ Sections Navigator Styles
   font-weight: 300;
   margin-left: 0.1rem;
 }
+.completed-number {
+  background-color: green;
+}
 
+.completed-section .inactive-title {
+  color: green;
+}
+
+.completed-pill {
+  background-color: green;
+}
+
+.section-number,
+.subsection-pill {
+  transition: background-color 0.3s ease;
+}
+
+/* Common styles for both buttons */
+.navigation-button {
+  background-color: #4A90E2;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 1.875rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: 'Inter', sans-serif; /* Match your app's font */
+  margin: 0.5rem; /* Add some spacing between buttons */
+}
+
+/* Hover effect */
+.navigation-button:hover {
+  background-color: #357ABD;
+}
+
+/* Specific styles for the Back button */
+.back-button {
+  background-color: #ccc;
+  color: #333;
+}
+
+/* Hover effect for Back button */
+.back-button:hover {
+  background-color: #aaa;
+}
+
+/* Optional: Disabled state */
+.navigation-button:disabled {
+  background-color: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between; /* Adjust alignment */
+  margin-top: 2rem; /* Add space above the buttons */
+}

@@ -3,8 +3,6 @@
   import SectionsNavigator from './components/SectionsNavigator';
   import axios from 'axios';
 
-
-
   const sections = {
     personalInfo: [
       {
@@ -279,6 +277,7 @@
     const [clickedHelp, setClickedHelp] = useState({});
     const [completedSubsections, setCompletedSubsections] = useState({});
     const [completedSections, setCompletedSections] = useState({});
+    const [isReviewPage, setIsReviewPage] = useState(false); // New state variable
 
 
     const toggleHelp = (index) => {
@@ -416,13 +415,18 @@
       } else if (currentSection < totalSections - 1) {
         setCurrentSection(currentSection + 1);
         setCurrentSubPage(0);
+      } else {
+        // We've reached the end of all sections and subpages
+        setIsReviewPage(true); // Move to the review page
       }
 
       updateProgress();
-    };
+   };
 
     const handlePreviousSubPage = () => {
-      if (currentSubPage > 0) {
+      if (isReviewPage) {
+        setIsReviewPage(false); // Go back from the review page
+      } else if (currentSubPage > 0) {
         setCurrentSubPage(currentSubPage - 1);
       } else if (currentSection > 0) {
         const previousSection = currentSection - 1;
@@ -441,8 +445,7 @@
     };
 
     const handleSubmit = async (e) => {
-      e.preventDefault();
-    
+      // No need to prevent default here since we're calling it on button click
       // Map formData keys to match backend expected keys
       const dataToSend = {
         name: formData.fullName,
@@ -735,7 +738,7 @@
     };
 
     const currentSubPageContent = sections[sectionNames[currentSection]][currentSubPage];
-    const { baseText, boldText } = currentSubPageContent;
+    const { baseText, boldText } = currentSubPageContent || {};
 
     return (
       <div className="App">
@@ -762,48 +765,67 @@
                 completedSubsections={completedSubsections} // Pass completedSubsections
                 completedSections={completedSections}       // Pass completedSections
               />
-            <form onSubmit={handleSubmit}>
-              <hr className="startseparator"></hr>
-              {/* <h2>{sectionTitles[sectionNames[currentSection]]}</h2> */}
-              {/* <h3>{currentSubPageContent.title}</h3> */}
+            <form onSubmit={(e) => e.preventDefault()}>
+            <hr className="startseparator"></hr>
+            {isReviewPage ? (
+              <>
+                <h2>Review Your Information</h2>
+                <div className="review-page">
+                  {Object.entries(formData).map(([key, value]) => (
+                    <div key={key} className="review-item">
+                      <strong>{key.replace(/-/g, ' ')}:</strong> {value}
+                    </div>
+                  ))}
+                </div>
+                <div className="buttons">
+                  <button
+                    type="button"
+                    onClick={handlePreviousSubPage}
+                    className="navigation-button back-button"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    className="navigation-button submit-button"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Render the form fields */}
+                {currentSubPageContent && currentSubPageContent.groups.map((group, groupIndex) => (
+                  renderGroup(group, groupIndex)
+                ))}
 
-              {currentSubPageContent.groups.map((group, groupIndex) => (
-                renderGroup(group, groupIndex)
-              ))}
-
-            <div className="buttons">
-              {(currentSection > 0 || currentSubPage > 0) && (
-                <button
-                  type="button"
-                  onClick={handlePreviousSubPage}
-                  className="navigation-button back-button"
-                >
-                  Back
-                </button>
-              )}
-              {currentSection === totalSections - 1 && currentSubPage === sections[sectionNames[currentSection]].length - 1 ? (
-                <button
-                  type="submit"
-                  className="navigation-button submit-button"
-                >
-                  Submit
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleNextSubPage}
-                  className="navigation-button next-button"
-                >
-                  Next
-                </button>
-              )}
-            </div>
-
-            </form>
-          </div>
+                <div className="buttons">
+                  {(currentSection > 0 || currentSubPage > 0) && (
+                    <button
+                      type="button"
+                      onClick={handlePreviousSubPage}
+                      className="navigation-button back-button"
+                    >
+                      Back
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleNextSubPage}
+                    className="navigation-button next-button"
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
+            )}
+          </form>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  export default App;
+export default App;

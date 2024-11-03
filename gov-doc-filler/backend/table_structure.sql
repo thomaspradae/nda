@@ -1,0 +1,16 @@
+ALTER TABLE submissions ADD COLUMN alternate_names VARCHAR(255);
+ALTER TABLE submissions ADD COLUMN dob_month VARCHAR(2);
+ALTER TABLE submissions ADD COLUMN dob_day VARCHAR(2);
+ALTER TABLE submissions ADD COLUMN dob_year VARCHAR(4);
+ALTER TABLE submissions ADD COLUMN ssn_part1 VARCHAR(3);
+ALTER TABLE submissions ADD COLUMN ssn_part2 VARCHAR(2);
+ALTER TABLE submissions ADD COLUMN ssn_part3 VARCHAR(4);
+ALTER TABLE submissions ADD COLUMN dob DATE;
+ALTER TABLE submissions ADD COLUMN ssn VARCHAR(20);
+ALTER TABLE submissions ADD COLUMN citizenship VARCHAR(50);
+ALTER TABLE submissions ADD COLUMN employment_status VARCHAR(50);
+ALTER TABLE submissions ADD COLUMN occupation VARCHAR(100);
+ALTER TABLE submissions ADD COLUMN annual_income NUMERIC;
+ALTER TABLE submissions ADD COLUMN income_source VARCHAR(100);
+ALTER TABLE submissions ADD COLUMN marital_status VARCHAR(20);
+ALTER TABLE submissions ADD COLUMN email VARCHAR(100);

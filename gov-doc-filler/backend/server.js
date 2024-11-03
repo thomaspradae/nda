@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { Pool } = require('pg'); // Add PostgreSQL pool here
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,12 +26,36 @@ app.get('/', (req, res) => {
 
 // Handle Form Data and insert it into PostgreSQL
 app.post('/submit', async (req, res) => {
-  const { name, email, maritalStatus, age } = req.body;
-  
+  const {
+    name,
+    alternateNames,
+    dobMonth,
+    dobDay,
+    dobYear,
+    ssnPart1,
+    ssnPart2,
+    ssnPart3,
+    citizenship,
+    email,
+    maritalStatus,
+    employmentStatus,
+    occupation,
+    annualIncome,
+    incomeSource,
+  } = req.body;
+
   try {
-    const query = 'INSERT INTO submissions (name, email, marital_status, age) VALUES ($1, $2, $3, $4)';
-    const values = [name, email, maritalStatus, age];
-    
+    const query = `
+      INSERT INTO submissions (
+        name, alternate_names, dob_month, dob_day, dob_year, ssn_part1, ssn_part2, ssn_part3,
+        citizenship, email, marital_status, employment_status, occupation, annual_income, income_source
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    `;
+    const values = [
+      name, alternateNames, dobMonth, dobDay, dobYear, ssnPart1, ssnPart2, ssnPart3,
+      citizenship, email, maritalStatus, employmentStatus, occupation, annualIncome, incomeSource,
+    ];
+
     await pool.query(query, values); // Insert form data into PostgreSQL
     
     res.send('Form data saved to the database!');

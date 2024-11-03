@@ -85,7 +85,11 @@ const SectionsNavigator = ({
               ) : (
                 <div className="inactive-title-wrapper">
                   <div className="inactive-pills">
-                    <span className="inactive-pill"></span>
+  <span
+    className={`inactive-pill ${
+      completedSections[sectionIndex] ? 'completed-inactive-pill' : ''
+    }`}
+  ></span>
                   </div>
                   <span className="inactive-title">{sectionTitles[sectionName] || sectionName}</span>
                 </div>

@@ -1,7 +1,13 @@
+// server.js
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { Pool } = require('pg'); // Add PostgreSQL pool here
+const { Pool } = require('pg');
+const { exec } = require('child_process');
+const path = require('path');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -11,35 +17,272 @@ const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
   database: 'gov_doc_filler_base',
-  password: 'Warrenzack1', // The password you just entered
-  port: 5432, // Default PostgreSQL port
+  password: 'Warrenzack1', // Use environment variables in production
+  port: 5432,
 });
 
 // Middleware
 app.use(bodyParser.json());
 app.use(cors());
 
-// Test Route
-app.get('/', (req, res) => {
-  res.send('Server is running...');
+// Secret key for JWT (use environment variable in production)
+const JWT_SECRET = 'your_jwt_secret_key';
+
+// Authentication Middleware
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // 'Bearer TOKEN'
+  if (!token) return res.status(401).json({ message: 'Access token required' });
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ message: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+}
+
+// Loan Officer Registration
+app.post('/api/loan-officers/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    // Check if email already exists
+    const existingOfficer = await pool.query('SELECT * FROM loan_officers WHERE email = $1', [email]);
+    if (existingOfficer.rows.length > 0) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+    // Hash the password
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+    // Generate a unique identifier
+    const identifier = 'LO-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    // Insert the loan officer into the database
+    const result = await pool.query(
+      'INSERT INTO loan_officers (name, email, password_hash, identifier) VALUES ($1, $2, $3, $4) RETURNING id, name, email, identifier',
+      [name, email, passwordHash, identifier]
+    );
+    res.status(201).json({ loanOfficer: result.rows[0] });
+  } catch (error) {
+    console.error('Error registering loan officer:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Loan Officer Login
+app.post('/api/loan-officers/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const officerResult = await pool.query('SELECT * FROM loan_officers WHERE email = $1', [email]);
+    if (officerResult.rows.length === 0) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+    const officer = officerResult.rows[0];
+    // Compare passwords
+    const passwordMatch = await bcrypt.compare(password, officer.password_hash);
+    if (!passwordMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+    // Generate JWT token
+    const token = jwt.sign({ id: officer.id, role: 'loan_officer' }, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token, loanOfficer: { id: officer.id, name: officer.name, email: officer.email } });
+  } catch (error) {
+    console.error('Error logging in loan officer:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Filler Registration
+app.post('/api/fillers/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    // Check if email already exists
+    const existingFiller = await pool.query('SELECT * FROM fillers WHERE email = $1', [email]);
+    if (existingFiller.rows.length > 0) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+    // Hash the password
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+    // Insert the filler into the database
+    const result = await pool.query(
+      'INSERT INTO fillers (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email',
+      [name, email, passwordHash]
+    );
+    res.status(201).json({ filler: result.rows[0] });
+  } catch (error) {
+    console.error('Error registering filler:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Filler Login
+app.post('/api/fillers/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const fillerResult = await pool.query('SELECT * FROM fillers WHERE email = $1', [email]);
+    if (fillerResult.rows.length === 0) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+    const filler = fillerResult.rows[0];
+    // Compare passwords
+    const passwordMatch = await bcrypt.compare(password, filler.password_hash);
+    if (!passwordMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+    // Generate JWT token
+    const token = jwt.sign({ id: filler.id, role: 'filler' }, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token, filler: { id: filler.id, name: filler.name, email: filler.email } });
+  } catch (error) {
+    console.error('Error logging in filler:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get Loan Officers (for fillers to select)
+app.get('/api/fillers/loan-officers', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, name FROM loan_officers');
+    res.json({ loanOfficers: result.rows });
+  } catch (error) {
+    console.error('Error fetching loan officers:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get Submissions for Loan Officer
+app.get('/api/loan-officers/submissions', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'loan_officer') {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+  const loanOfficerId = req.user.id;
+  try {
+    const result = await pool.query(
+      `SELECT s.*, f.name AS filler_name, f.email AS filler_email
+       FROM submissions s
+       JOIN fillers f ON s.filler_id = f.id
+       WHERE s.loan_officer_id = $1`,
+      [loanOfficerId]
+    );
+    res.json({ submissions: result.rows });
+  } catch (error) {
+    console.error('Error fetching submissions:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+// Filler selects Loan Officer
+app.post('/api/fillers/select-loan-officer', authenticateToken, async (req, res) => {
+  const fillerId = req.user.id;
+  const { loanOfficerId } = req.body;
+  try {
+    await pool.query('UPDATE fillers SET loan_officer_id = $1 WHERE id = $2', [loanOfficerId, fillerId]);
+    res.json({ message: 'Loan officer selected successfully' });
+  } catch (error) {
+    console.error('Error selecting loan officer:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 // Handle Form Data and insert it into PostgreSQL
-app.post('/submit', async (req, res) => {
-  const { name, email, maritalStatus, age } = req.body;
-  
+app.post('/submit', authenticateToken, async (req, res) => {
+  const {
+    name,
+    alternateNames,
+    dobMonth,
+    dobDay,
+    dobYear,
+    ssnPart1,
+    ssnPart2,
+    ssnPart3,
+    citizenship,
+    email,
+    maritalStatus,
+    employmentStatus,
+    occupation,
+    annualIncome,
+    incomeSource,
+  } = req.body;
+
   try {
-    const query = 'INSERT INTO submissions (name, email, marital_status, age) VALUES ($1, $2, $3, $4)';
-    const values = [name, email, maritalStatus, age];
+    // Get the filler ID from the authenticated user
+    const fillerId = req.user.id;
+    // Get the loan officer ID associated with the filler
+    const fillerResult = await pool.query('SELECT loan_officer_id FROM fillers WHERE id = $1', [fillerId]);
+    const loanOfficerId = fillerResult.rows[0].loan_officer_id;
+
+    // Now include `filler_id` and `loan_officer_id` in your INSERT query
+    const query = `
+      INSERT INTO submissions (
+        name, alternate_names, dob_month, dob_day, dob_year, ssn_part1, ssn_part2, ssn_part3,
+        citizenship, email, marital_status, employment_status, occupation, annual_income, income_source,
+        filler_id, loan_officer_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+      RETURNING id
+    `;
+    const values = [
+      name,
+      alternateNames,
+      dobMonth,
+      dobDay,
+      dobYear,
+      ssnPart1,
+      ssnPart2,
+      ssnPart3,
+      citizenship,
+      email,
+      maritalStatus,
+      employmentStatus,
+      occupation,
+      annualIncome,
+      incomeSource,
+      fillerId,
+      loanOfficerId,
+    ];
+
+    const result = await pool.query(query, values); // Insert form data into PostgreSQL
+    const submissionId = result.rows[0].id; // Get the inserted submission ID
+
+    console.log(`New submission ID: ${submissionId}`);
+
+    // Define the paths using the path module
+    const pythonExecutable = 'python'; // Assumes 'python' is in the system PATH
+
+    // Construct the script path relative to this file (server.js)
+    const scriptPath = path.join(__dirname, '..', 'pdf_script', 'read_pdf.py');
+
+    // Construct the command
+    const command = `"${pythonExecutable}" "${scriptPath}" ${submissionId}`;
+
+    // Execute the Python script
+    exec(command, async (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing Python script: ${error.message}`);
+        return res.status(500).send('Error generating PDF');
+      }
+      if (stderr) {
+        console.error(`Python script stderr: ${stderr}`);
+      }
     
-    await pool.query(query, values); // Insert form data into PostgreSQL
+      // stdout should contain the PDF file path
+      const pdfPath = stdout.trim(); // Trim any newline characters
+      console.log(`Generated PDF Path: ${pdfPath}`);
     
-    res.send('Form data saved to the database!');
+      // Update the submission with the PDF path
+      try {
+        await pool.query('UPDATE submissions SET pdf_path = $1 WHERE id = $2', [pdfPath, submissionId]);
+        res.send('Form data saved and PDF path updated in the database!');
+      } catch (dbError) {
+        console.error('Error saving PDF path:', dbError);
+        res.status(500).send('Error saving PDF path');
+      }
+    });    
   } catch (error) {
     console.error('Error saving form data:', error);
     res.status(500).send('Error saving form data');
   }
 });
+
+app.use('/pdfs', express.static(path.join(__dirname, 'pdf_script', 'output_pdfs')));
 
 // Start the server
 app.listen(PORT, () => {

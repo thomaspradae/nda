@@ -15,7 +15,7 @@ else:
 # Database connection parameters
 db_name = 'gov_doc_filler_base'
 db_user = 'postgres'
-db_password = 'Warrenzack1'  # In production, use environment variables
+db_password = 'Warrenzack1'  # Use environment variables in production
 db_host = 'localhost'
 db_port = '5432'
 
@@ -26,7 +26,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 pdf_path = os.path.join(script_dir, 'form1003.pdf')
 
 def fetch_field_data(submission_id):
-    # Connect to PostgreSQL
+    """Fetch submission data from the database."""
     conn = psycopg2.connect(
         dbname=db_name,
         user=db_user,
@@ -36,7 +36,6 @@ def fetch_field_data(submission_id):
     )
     cursor = conn.cursor()
 
-    # SQL query to fetch data for the specific submission ID
     cursor.execute("""
         SELECT 
             name, email, dob_month, dob_day, dob_year, 
@@ -45,42 +44,60 @@ def fetch_field_data(submission_id):
         WHERE id = %s
     """, (submission_id,))
 
-    # Fetch the result
     row = cursor.fetchone()
+    field_data = {
+        'name': row[0],
+        'email': row[1],
+        'dob_month': row[2],
+        'dob_day': row[3],
+        'dob_year': row[4],
+        'ssn_part1': row[5],
+        'ssn_part2': row[6],
+        'ssn_part3': row[7],
+        'citizenship': row[8],
+        'marital_status': row[9],
+    } if row else {}
 
-    # Check if a row was returned
-    if row:
-        # Map the result to your field names
-        field_data = {
-            'name': row[0],
-            'email': row[1],
-            'dob_month': row[2],
-            'dob_day': row[3],
-            'dob_year': row[4],
-            'ssn_part1': row[5],
-            'ssn_part2': row[6],
-            'ssn_part3': row[7],
-            'citizenship': row[8],
-            'marital_status': row[9],
-            # Add more fields as necessary
-        }
-    else:
-        print(f"No data found in the database for submission ID {submission_id}.")
-        field_data = {}
-
-    print("\n###############################################")
-    print("Field data retrieved from database:", field_data)
-    print("###############################################\n")
-
-    # Close the cursor and connection
     cursor.close()
     conn.close()
-
     return field_data
 
-db = fetch_field_data(submission_id)
-print(db)
+def map_fields(field_data, field_mapping):
+    """Map database fields to PDF fields."""
+    mapped_data = {}
+    for db_field, value in field_data.items():
+        if db_field in field_mapping:
+            mapped_data[field_mapping[db_field]] = value
+    return mapped_data
 
+def sanitize_filename(name):
+    """Sanitize filenames to remove special characters."""
+    sanitized_name = re.sub(r'[^A-Za-z0-9 _-]', '', name).replace(' ', '_')
+    return sanitized_name
+
+def set_field_values(pdf_path, output_path, field_data):
+    """Fill PDF fields with mapped data."""
+    with open(pdf_path, 'rb') as file:
+        reader = PyPDF2.PdfReader(file)
+        writer = PyPDF2.PdfWriter()
+
+        for page in reader.pages:
+            writer.add_page(page)
+
+        fields = reader.get_fields()
+        if fields:
+            writer.update_page_form_field_values(
+                writer.pages[0], 
+                {NameObject(key): TextStringObject(str(value)) for key, value in field_data.items() if value}
+            )
+            writer._root_object.update({
+                NameObject('/NeedAppearances'): PyPDF2.generic.BooleanObject(True)
+            })
+
+        with open(output_path, 'wb') as output_file:
+            writer.write(output_file)
+
+# Field mapping: database fields -> PDF fields
 field_mapping = {
     'name': '_1a_Name[0]',
     'email': 'pdf_email_field',
@@ -92,79 +109,43 @@ field_mapping = {
     'ssn_part3': 'pdf_ssn_part3_field',
     'citizenship': 'pdf_citizenship_field',
     'marital_status': 'pdf_marital_status_field',
-    # Add mappings for all fields you want to populate
 }
 
-def map_fields(field_data, field_mapping):
-    mapped_data = {}
-    for db_field, value in field_data.items():
-        if db_field in field_mapping:
-            pdf_field = field_mapping[db_field]
-            mapped_data[pdf_field] = value
-        else:
-            print(f"Warning: No PDF field mapping for database field '{db_field}'")
-    return mapped_data
+# Main Script Execution
+field_data = fetch_field_data(submission_id)
+mapped_data = map_fields(field_data, field_mapping)
 
-mapped_data = map_fields(db, field_mapping)
-print("mapped data", mapped_data)
+# Sanitize name for the output filename
+sanitized_name = sanitize_filename(field_data.get('name', 'unknown'))
 
-def sanitize_filename(name):
-    # Remove any characters that are not alphanumeric, spaces, underscores, or hyphens
-    sanitized_name = re.sub(r'[^A-Za-z0-9 _-]', '', name)
-    # Replace spaces with underscores
-    sanitized_name = sanitized_name.replace(' ', '_')
-    return sanitized_name
-
-def set_field_values(pdf_path, output_path, field_data):
-
-    with open(pdf_path, 'rb') as file:
-        reader = PyPDF2.PdfReader(file)
-        writer = PyPDF2.PdfWriter()
-
-        for page_num in range(len(reader.pages)):
-            page = reader.pages[page_num]
-            writer.add_page(page)
-
-        fields = reader.get_fields()
-        if fields:
-            for field_name, field in fields.items():
-                if field_name in field_data:
-                    writer.update_page_form_field_values(
-                        writer.pages[0],
-                        {NameObject(field_name): TextStringObject(str(field_data[field_name]))}
-                    )
-                    print(f"Updated Field: '{field_name}' with value '{field_data[field_name]}'")
-                else:
-                    print(f"No matching data for field '{field_name}'")
-
-            writer._root_object.update({
-                NameObject('/NeedAppearances'): PyPDF2.generic.BooleanObject(True)
-            })
-
-        else:
-            print("No fields found in the PDF.")
-
-        with open(output_path, 'wb') as output_file:
-            writer.write(output_file)
-
-# Sanitize the name to use in the filename
-if 'name' in db and db['name']:
-    sanitized_name = sanitize_filename(db['name'])
-else:
-    sanitized_name = 'unknown'
-
-# Directory to save the output PDFs
+# Generate output directory and filename
 output_dir = os.path.join(script_dir, 'output_pdfs')
-
-# Ensure the output directory exists
 os.makedirs(output_dir, exist_ok=True)
 
-# Generate the output filename
 output_filename = f"filled_form_{sanitized_name}_{submission_id}.pdf"
-
-# Full path to the output PDF
 output_path = os.path.join(output_dir, output_filename)
 
+# Fill the PDF and save it
 set_field_values(pdf_path, output_path, mapped_data)
 
-print("PDF generated:", output_path)
+# Print the PDF path (ONLY the path for server.js to use)
+pdf_relative_path = f"/pdfs/{output_filename}"
+print(pdf_relative_path)
+
+# Update the database with the PDF path
+try:
+    conn = psycopg2.connect(
+        dbname=db_name,
+        user=db_user,
+        password=db_password,
+        host=db_host,
+        port=db_port
+    )
+    cursor = conn.cursor()
+    cursor.execute("UPDATE submissions SET pdf_path = %s WHERE id = %s", (pdf_relative_path, submission_id))
+    conn.commit()
+except Exception as e:
+    print(f"Error updating PDF path in database: {e}")
+finally:
+    cursor.close()
+    conn.close()

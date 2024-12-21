@@ -16,3 +16,24 @@ CREATE TABLE submissions (
   annual_income NUMERIC(10, 2),
   income_source VARCHAR(100)
 );
+
+CREATE TABLE loan_officers (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  identifier VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE fillers (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  loan_officer_id INTEGER REFERENCES loan_officers(id)
+);
+
+ALTER TABLE submissions
+ADD COLUMN filler_id INTEGER REFERENCES fillers(id),
+ADD COLUMN loan_officer_id INTEGER REFERENCES loan_officers(id);
+

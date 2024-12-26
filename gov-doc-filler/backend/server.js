@@ -29,7 +29,7 @@ app.use(cors());
 // Secret key for JWT (use environment variable in production)
 const JWT_SECRET = 'your_jwt_secret_key';
 
-const googleClient = new OAuth2Client('YOUR_GOOGLE_CLIENT_ID'); // Replace with your actual Google Client ID
+const googleClient = new OAuth2Client('451439771384-vk6ftioub9pqogjjcjfebl3anfp2qmiu.apps.googleusercontent.com'); // Replace with your actual Google Client ID
 
 // Authentication Middleware
 function authenticateToken(req, res, next) {
@@ -55,29 +55,32 @@ app.post('/api/google-login', async (req, res) => {
     // Verify Google ID token
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
-      audience: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your actual Google Client ID
+      audience: '451439771384-vk6ftioub9pqogjjcjfebl3anfp2qmiu.apps.googleusercontent.com', // Replace with your actual Google Client ID
     });
     const payload = ticket.getPayload();
+    console.log('Google Payload:', payload);
+
     const { email, name } = payload;
 
-    // Check if user exists in the database
-    let user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (user.rows.length === 0) {
-      // Register the user if not found
-      user = await pool.query(
-        'INSERT INTO users (name, email, role) VALUES ($1, $2, $3) RETURNING *',
-        [name, email, 'filler'] // Default role is "filler"; update as necessary
+    // Check if the filler exists in the database
+    let filler = await pool.query('SELECT * FROM fillers WHERE email = $1', [email]);
+    if (filler.rows.length === 0) {
+      // Register the filler if not found
+      filler = await pool.query(
+        'INSERT INTO fillers (name, email, password_hash) VALUES ($1, $2, $3) RETURNING *',
+        [name, email, ''] // Google sign-in won't have a password; store an empty hash
       );
     }
 
     // Generate JWT token
-    const jwtToken = jwt.sign({ id: user.rows[0].id, role: user.rows[0].role }, JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token: jwtToken, user: user.rows[0] });
+    const jwtToken = jwt.sign({ id: filler.rows[0].id, role: 'filler' }, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token: jwtToken, user: filler.rows[0] });
   } catch (error) {
     console.error('Google Sign-In Error:', error);
     res.status(500).json({ message: 'Google authentication failed' });
   }
 });
+
 
 // Loan Officer Registration
 app.post('/api/loan-officers/register', async (req, res) => {

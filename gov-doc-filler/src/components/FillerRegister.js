@@ -32,7 +32,7 @@ const FillerRegister = () => {
       localStorage.setItem('token', token);
 
       alert('Registration successful. Redirecting to your dashboard...');
-      navigate('/filler/dashboard'); // Redirect to filler dashboard
+      navigate('/dashboard'); // Redirect to filler dashboard
     } catch (error) {
       console.error('Error registering:', error);
       alert(error.response?.data?.message || 'An error occurred');

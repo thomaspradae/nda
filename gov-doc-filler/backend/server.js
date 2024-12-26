@@ -35,14 +35,19 @@ const googleClient = new OAuth2Client('YOUR_GOOGLE_CLIENT_ID'); // Replace with 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // 'Bearer TOKEN'
+  console.log('Token:', token); // Debug
   if (!token) return res.status(401).json({ message: 'Access token required' });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Invalid token' });
+    if (err) {
+      console.error('Invalid token:', err); // Debug
+      return res.status(403).json({ message: 'Invalid token' });
+    }
     req.user = user;
     next();
   });
 }
+
 
 app.post('/api/google-login', async (req, res) => {
   const { token } = req.body;
@@ -96,6 +101,44 @@ app.post('/api/loan-officers/register', async (req, res) => {
     res.status(201).json({ loanOfficer: result.rows[0] });
   } catch (error) {
     console.error('Error registering loan officer:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update submission details
+app.put('/api/submissions/:id', authenticateToken, async (req, res) => {
+  const submissionId = req.params.id;
+  const updates = req.body;
+
+  try {
+    const query = `
+      UPDATE submissions
+      SET ${Object.keys(updates)
+        .map((key, i) => `${key} = $${i + 1}`)
+        .join(', ')}
+      WHERE id = $${Object.keys(updates).length + 1}
+      RETURNING *;
+    `;
+    const values = [...Object.values(updates), submissionId];
+    const result = await pool.query(query, values);
+
+    // Regenerate the PDF
+    const submission = result.rows[0];
+    const pythonExecutable = 'python';
+    const scriptPath = path.join(__dirname, '..', 'pdf_script', 'read_pdf.py');
+    const command = `"${pythonExecutable}" "${scriptPath}" ${submissionId}`;
+
+    exec(command, async (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing Python script: ${error.message}`);
+        return res.status(500).send('Error regenerating PDF');
+      }
+      const pdfPath = stdout.trim();
+      await pool.query('UPDATE submissions SET pdf_path = $1 WHERE id = $2', [pdfPath, submissionId]);
+      res.json({ message: 'Submission updated and PDF regenerated successfully!', submission });
+    });
+  } catch (error) {
+    console.error('Error updating submission details:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

@@ -20,7 +20,6 @@ function AppForm() {
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [pdfLink, setPdfLink] = useState(null);
 
-
   const toggleHelp = (index) => {
     setClickedHelp((prev) => ({
       ...prev,
@@ -70,7 +69,21 @@ function AppForm() {
     }
     return true;
   };
-  
+
+  const renderSuccessPage = () => (
+    <div className="success-page">
+        <h2>Form Submitted Successfully! 🎉</h2>
+        <p>Thank you for your submission. Your form has been successfully submitted.</p>
+        {pdfLink && (
+            <p>
+                <a href={pdfLink} target="_blank" rel="noopener noreferrer">
+                    Download Your PDF
+                </a>
+            </p>
+        )}
+        <a href="/dashboard" className="dashboard-link">Go to Dashboard</a>
+    </div>
+);
   
   const isSectionCompleted = (sectionIndex) => {
     const totalSubPages = sections[sectionNames[sectionIndex]].length;
@@ -83,7 +96,6 @@ function AppForm() {
     return true;
   };
   
-
   const handleNavigation = (sectionIndex, subPageIndex) => {
     setCurrentSection(sectionIndex);
     setCurrentSubPage(subPageIndex);
@@ -229,6 +241,8 @@ function AppForm() {
   
       alert('Form submitted successfully!');
       console.log('Server response:', response.data);
+      setSubmissionSuccess(true);
+      setPdfLink(response.data.pdfPath || null); // Ensure your server returns the `pdfPath`
   
       // Redirect or perform any other actions after successful submission
     } catch (error) {
@@ -239,8 +253,6 @@ function AppForm() {
     }
   };
   
-
-
   const Separator = ({ title }) => (
     <div className="separator">
       <hr />
@@ -506,7 +518,7 @@ function AppForm() {
 
   return (
     <div className="App">
-      <div className="main-content">
+      <div className="main-content">{submissionSuccess ? renderSuccessPage() : (
         <div className="form-section">
           <div className="progress-val">
           <h2 className="progress-title">Your progress</h2>
@@ -587,6 +599,7 @@ function AppForm() {
           )}
         </form>
       </div>
+      )}
     </div>
   </div>
 );

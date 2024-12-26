@@ -10,15 +10,17 @@ const FillerDashboard = () => {
     const fetchSubmissions = async () => {
       try {
         const token = localStorage.getItem('token');
+        console.log('Token:', token); // Debug
         const response = await axios.get('http://localhost:5000/api/submissions', {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log('Submissions:', response.data); // Debug
         setSubmissions(response.data);
       } catch (error) {
-        console.error('Error fetching submissions:', error);
+        console.error('Error fetching submissions:', error.response || error);
       }
     };
-
+    
     fetchSubmissions();
   }, []);
 

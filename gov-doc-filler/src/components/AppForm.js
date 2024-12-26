@@ -17,6 +17,8 @@ function AppForm() {
   const [completedSubsections, setCompletedSubsections] = useState({});
   const [completedSections, setCompletedSections] = useState({});
   const [isReviewPage, setIsReviewPage] = useState(false); // New state variable
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const [pdfLink, setPdfLink] = useState(null);
 
 
   const toggleHelp = (index) => {
@@ -184,6 +186,8 @@ function AppForm() {
   };
 
   const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+  
     // Map formData keys to match backend expected keys
     const dataToSend = {
       name: formData.fullName,
@@ -201,26 +205,41 @@ function AppForm() {
       occupation: formData.occupation,
       annualIncome: formData.annualIncome,
       incomeSource: formData.incomeSource,
-      // Include other fields as necessary
     };
+  
     try {
       // Get the token from localStorage
       const token = localStorage.getItem('token');
+      if (!token) {
+        alert('User is not authenticated. Please log in.');
+        return;
+      }
+  
+      // Log payload and token for debugging
+      console.log('Payload:', dataToSend);
+      console.log('Token:', token);
   
       // Send data to the backend
       const response = await axios.post('http://localhost:5000/submit', dataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json', // Ensure correct content type
         },
       });
   
       alert('Form submitted successfully!');
+      console.log('Server response:', response.data);
+  
       // Redirect or perform any other actions after successful submission
     } catch (error) {
-      console.error('Error submitting form:', error.response.data);
-      alert(error.response.data.message || 'An error occurred during form submission.');
+      console.error('Error submitting form:', error.response?.data || error.message);
+      alert(
+        error.response?.data?.message || 'An error occurred during form submission.'
+      );
     }
   };
+  
+
 
   const Separator = ({ title }) => (
     <div className="separator">

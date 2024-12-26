@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { setToken } from '../utils/auth';
 
 const LoanOfficerLogin = () => {
@@ -38,6 +38,24 @@ const LoanOfficerLogin = () => {
         </div>
         <button type="submit">Login</button>
       </form>
+      <p>
+        Not a loan officer? <Link to="/log-in">Regular log in here</Link>
+      </p>
+      <button
+        onClick={() => navigate('/loan-officer/register')}
+        style={{
+          marginTop: '10px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          cursor: 'pointer',
+          backgroundColor: '#007BFF',
+          color: '#FFF',
+          border: 'none',
+          borderRadius: '5px',
+        }}
+      >
+        Don't have a loan officer account? Register here
+      </button>
     </div>
   );
 };

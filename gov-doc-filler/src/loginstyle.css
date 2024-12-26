@@ -1,0 +1,186 @@
+/* Reset and Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.login-page html, .login-page body, .login-page #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ede8f5;
+}
+
+
+.login-page #root {
+    max-width: 900px;
+    max-height: 600px;
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    background-color: #ffffff;
+}
+
+
+.login-page .main-container {
+    width: 100%;
+    max-width: 900px;
+    height: 100%;
+    max-height: 600px;
+    display: flex;
+    flex-direction: row;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ede8f5;
+}
+
+/* Main Container */
+.main-container {
+    width: 90%;
+    max-width: 90%;
+    max-width: 70vw;
+    height: 70%;
+    /* width: 90%; */
+    /* height: 69%; */
+    display: flex;
+    flex-direction: row;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.left-section.form-section {
+    width: 45%;
+    opacity: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.left-section.form-section.active {
+    display: flex; /*Show only the active form */
+    opacity: 1;
+}
+
+.main-container.swap {
+    flex-direction: row-reverse;
+}
+
+/* Left Section: Form */
+.left-section {
+    width: 45%; /* Adjusted for balance */
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 5px /* Adds spacing in between the elements */
+}
+
+.left-section h1 {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.left-section p {
+    font-size: 15px;
+    margin-bottom: 20px;
+    color: #6b7280;
+}
+
+.left-section input {
+    width: 100%;
+    max-width: 350px;
+    padding: 14px;
+    margin: 10px 0;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #111827;
+    background-color: #f9fafb;
+    transition: border-color 0.2s ease;
+}
+
+.left-section input:focus {
+    border-color: #6366f1;
+}
+
+button {
+    width: 100%;
+    max-width: 350px;
+    padding: 14px;
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-bottom: 12px;
+}
+
+button:hover {
+    background-color: #059669;
+}
+
+/*Sign up prompt */
+.left-section p a {
+    color: #6366f1;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.left-section p a:hover {
+    color: #4f46e5;
+}
+
+/* Right Section: Video */
+.right-section {
+    width: 55%; /* Video takes 55% of the space */
+    background-color: #e8f5e9;
+}
+
+.right-section video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.right-section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+
+.google-signin-button {
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+  }
+  

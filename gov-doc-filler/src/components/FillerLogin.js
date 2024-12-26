@@ -1,8 +1,6 @@
-// src/components/FillerLogin.js
-
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const FillerLogin = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -19,11 +17,15 @@ const FillerLogin = () => {
       const response = await axios.post('http://localhost:5000/api/fillers/login', formData);
       const { token } = response.data;
       localStorage.setItem('token', token);
-      navigate('/select-loan-officer'); // Redirect to select loan officer
+      navigate('/dashboard'); // Redirect to dashboard
     } catch (error) {
       console.error('Error logging in:', error);
       alert(error.response?.data?.message || 'An error occurred');
     }
+  };
+
+  const handleRegisterRedirect = () => {
+    navigate('/register'); // Redirect to the register page
   };
 
   return (
@@ -40,6 +42,12 @@ const FillerLogin = () => {
         </div>
         <button type="submit">Login</button>
       </form>
+      <button onClick={handleRegisterRedirect} style={{ marginTop: '10px' }}>
+        Don't have an account? Register here
+      </button>
+      <p style={{ marginTop: '10px' }}>
+        Loan Officer? <Link to="/loan-officer/login">Log in here</Link>
+      </p>
     </div>
   );
 };

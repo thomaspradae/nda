@@ -8,6 +8,7 @@ const { exec } = require('child_process');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library'); // Google Auth Library
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,6 +29,8 @@ app.use(cors());
 // Secret key for JWT (use environment variable in production)
 const JWT_SECRET = 'your_jwt_secret_key';
 
+const googleClient = new OAuth2Client('YOUR_GOOGLE_CLIENT_ID'); // Replace with your actual Google Client ID
+
 // Authentication Middleware
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -40,6 +43,36 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
+app.post('/api/google-login', async (req, res) => {
+  const { token } = req.body;
+  try {
+    // Verify Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your actual Google Client ID
+    });
+    const payload = ticket.getPayload();
+    const { email, name } = payload;
+
+    // Check if user exists in the database
+    let user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (user.rows.length === 0) {
+      // Register the user if not found
+      user = await pool.query(
+        'INSERT INTO users (name, email, role) VALUES ($1, $2, $3) RETURNING *',
+        [name, email, 'filler'] // Default role is "filler"; update as necessary
+      );
+    }
+
+    // Generate JWT token
+    const jwtToken = jwt.sign({ id: user.rows[0].id, role: user.rows[0].role }, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token: jwtToken, user: user.rows[0] });
+  } catch (error) {
+    console.error('Google Sign-In Error:', error);
+    res.status(500).json({ message: 'Google authentication failed' });
+  }
+});
 
 // Loan Officer Registration
 app.post('/api/loan-officers/register', async (req, res) => {
@@ -86,6 +119,79 @@ app.post('/api/loan-officers/login', async (req, res) => {
     res.json({ token, loanOfficer: { id: officer.id, name: officer.name, email: officer.email } });
   } catch (error) {
     console.error('Error logging in loan officer:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/api/register', async (req, res) => {
+  const { name, email, password, role } = req.body;
+
+  if (!['filler', 'loan_officer'].includes(role)) {
+    return res.status(400).json({ message: 'Invalid role specified' });
+  }
+
+  const table = role === 'filler' ? 'fillers' : 'loan_officers';
+
+  try {
+    // Check if email already exists
+    const existingUser = await pool.query(`SELECT * FROM ${table} WHERE email = $1`, [email]);
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Hash the password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Insert the user into the database
+    const query = `
+      INSERT INTO ${table} (name, email, password_hash) 
+      VALUES ($1, $2, $3) 
+      RETURNING id, name, email
+    `;
+    const values = [name, email, passwordHash];
+    const result = await pool.query(query, values);
+
+    // Generate JWT token
+    const token = jwt.sign({ id: result.rows[0].id, role }, JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(201).json({ token, user: { ...result.rows[0], role } });
+  } catch (error) {
+    console.error('Error in register:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Search both tables
+    let user = await pool.query('SELECT * FROM fillers WHERE email = $1', [email]);
+    let role = 'filler';
+
+    if (user.rows.length === 0) {
+      user = await pool.query('SELECT * FROM loan_officers WHERE email = $1', [email]);
+      role = 'loan_officer';
+    }
+
+    if (user.rows.length === 0) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    const userData = user.rows[0];
+
+    // Verify password
+    const passwordMatch = await bcrypt.compare(password, userData.password_hash);
+    if (!passwordMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: userData.id, role }, JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200).json({ token, user: { ...userData, role } });
+  } catch (error) {
+    console.error('Error in login:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -144,6 +250,46 @@ app.get('/api/fillers/loan-officers', authenticateToken, async (req, res) => {
     res.json({ loanOfficers: result.rows });
   } catch (error) {
     console.error('Error fetching loan officers:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get submission history for a filler
+app.get('/api/submissions', authenticateToken, async (req, res) => {
+  const fillerId = req.user.id;
+  try {
+    const result = await pool.query(
+      `SELECT id, name, created_at, status
+       FROM submissions
+       WHERE filler_id = $1
+       ORDER BY created_at DESC`,
+      [fillerId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching submission history:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get details of a specific submission
+app.get('/api/submissions/:id', authenticateToken, async (req, res) => {
+  const submissionId = req.params.id;
+  const fillerId = req.user.id;
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM submissions WHERE id = $1 AND filler_id = $2`,
+      [submissionId, fillerId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Submission not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching submission details:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
